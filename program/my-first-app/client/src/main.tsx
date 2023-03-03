@@ -43,10 +43,39 @@ async function createList() {
 
 }
 
+async function createTask() {
+    const payload = {
+        type: "entry_function_payload",
+        function: `${accountConfig.authentKey}::todolist::create_task`,
+        type_arguments: [],
+        arguments: ["nghịch thử tí"],
+    };
+    const txnRequest = await client.generateTransaction(myAccount.address(), payload);
+    const signedTxn = await client.signTransaction(myAccount, txnRequest);
+    const transactionRes = await client.submitTransaction(signedTxn);
+    return await client.waitForTransaction(transactionRes.hash);
+}
+
+
+async function getTableTask() {
+    const todoListResource = await client.getAccountResource(
+        accountConfig.authentKey,
+        `${accountConfig.authentKey}::todolist::TodoList`
+    );
+    console.log(todoListResource)
+    const task = await client.getTableItem((todoListResource as any).data.tasks.handle, {
+        key_type: "u64",
+        value_type: `${accountConfig.authentKey}::todolist::Task`,
+        key: '1',
+    });
+    return task
+}
+
 async function main() {
-    let createListRs = await createList()
-    console.log(createListRs)
-    // console.log(myAccount)
+    // await createList()
+    // let createListRs = await createTask()
+
+    console.log(await getTableTask())
 
 }
 
